@@ -1,0 +1,14 @@
+name: Source
+version: ${project.version}
+main: org.sfinnqs.source.SourcePlugin
+api-version: "1.14"
+commands:
+  source:
+    description: Locate the source code of plugins on the server
+    usage: /<command> [plugin]
+  sourceadmin:
+    description: Administrate the Source plugin
+    usage: /<command> <reload | add | remove>
+permissions:
+  source.reload:
+    description: Allows use of the "/source reload" command

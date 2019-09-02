@@ -1,0 +1,6 @@
+server type: Spigot
+join message: "You can use the §o/source§r command to see the source code of plugins on this server"
+sources: # case sensitive
+  CraftBukkit: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit
+  Spigot: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/spigot
+  Paper: https://github.com/PaperMC/Paper
