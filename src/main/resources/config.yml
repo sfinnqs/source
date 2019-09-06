@@ -1,5 +1,12 @@
 server type: Spigot
-join message: "You can use the §o/source§r command to see the source code of plugins on this server"
+join message:
+  - "You can use the "
+  - text: /source
+    italic: true
+    clickEvent:
+      action: run_command
+      value: /source
+  - " command to see the source code of this server"
 sources: # case sensitive
   CraftBukkit: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit
   Spigot: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/spigot

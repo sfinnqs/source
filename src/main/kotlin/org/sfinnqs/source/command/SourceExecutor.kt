@@ -1,12 +1,12 @@
 package org.sfinnqs.source.command
 
-import com.google.gson.Gson
 import net.jcip.annotations.NotThreadSafe
 import org.bukkit.ChatColor.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.sfinnqs.source.SourcePlugin
+import org.sfinnqs.source.tellRaw
 
 @NotThreadSafe
 class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
@@ -28,26 +28,19 @@ class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
     }
 
     private fun sendAllSources(sender: CommandSender) {
-        val messageObject = mutableListOf<Any>("Click the links below to see the corresponding source: \n")
-        var first = true
-        for ((pluginName, source) in sourcePlugin.pluginSources.sources) {
-            if (first) {
-                first = false
-            } else {
-                messageObject.add(", ")
-            }
-            val pluginObject = mapOf(
-                    "text" to pluginName,
-                    "bold" to true,
-                    "underline" to true,
-                    "color" to "blue",
-                    "clickEvent" to mapOf("action" to "open_url", "value" to source),
-                    "hoverEvent" to mapOf(
-                            "action" to "show_text",
-                            "value" to listOf(mapOf("text" to pluginName, "bold" to false), " source code")
+        val messageObject = mutableListOf<Any>("Click the links below to see the corresponding source code:")
+        sourcePlugin.pluginSources.sources.flatMapTo(messageObject) { (pluginName, source) ->
+            listOf(
+                    "\n- ",
+                    mapOf(
+                            "text" to pluginName,
+                            "bold" to true,
+                            "underlined" to true,
+                            "color" to "blue",
+                            "clickEvent" to mapOf("action" to "open_url", "value" to source),
+                            "hoverEvent" to mapOf("action" to "show_text", "value" to "$pluginName source code")
                     )
             )
-            messageObject.add(pluginObject)
         }
         sender.tellRaw(messageObject)
     }
@@ -74,19 +67,10 @@ class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
                         "underlined" to true,
                         "color" to "blue",
                         "clickEvent" to mapOf("action" to "open_url", "value" to source),
-                        "hoverEvent" to mapOf(
-                                "action" to "show_text",
-                                "value" to listOf(mapOf("text" to name, "bold" to true), " source code")
-                        )
+                        "hoverEvent" to mapOf("action" to "show_text", "value" to "$name source code")
                 )
         )
         sender.tellRaw(messageObject)
-    }
-
-    private fun CommandSender.tellRaw(message: Any) {
-        val messageText = Gson().toJson(message)
-        // https://stackoverflow.com/a/34636083
-        server.dispatchCommand(server.consoleSender, "tellraw $name $messageText")
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String> {

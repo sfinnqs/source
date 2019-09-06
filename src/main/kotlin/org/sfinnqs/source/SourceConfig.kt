@@ -7,7 +7,7 @@ import org.bukkit.configuration.ConfigurationSection
 @Immutable
 class SourceConfig(config: Configuration) {
     val serverType = config.getString("server type", null)
-    val joinMessage = config.getString("join message")!!
+    val joinMessage = config["join message"]!!
     val sources = createStringMap(config.getSectionOrSet("sources"))
     fun asMap(): Map<String, Any> {
         val result = mutableMapOf<String, Any>()
