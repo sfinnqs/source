@@ -47,7 +47,7 @@ class PluginSources(private val sourcePlugin: SourcePlugin) {
         }
         for (plugin in sourcePlugin.server.pluginManager.plugins) {
             val pluginName = plugin.name
-            val pluginSource = configSources[pluginName] ?: (plugin as? OpenSource)?.source
+            val pluginSource = configSources[pluginName] ?: (plugin as? OpenSource)?.source?.toString()
             if (pluginSource != null) result[pluginName] = pluginSource
         }
         return result
@@ -76,7 +76,7 @@ class PluginSources(private val sourcePlugin: SourcePlugin) {
         } else {
             exactPlugin to exactPlugin.name
         }
-        val source = config.sources[officialName] ?: (plugin as? OpenSource)?.source
+        val source = config.sources[officialName] ?: (plugin as? OpenSource)?.source?.toString()
         return NameAndSource(officialName, source)
     }
 

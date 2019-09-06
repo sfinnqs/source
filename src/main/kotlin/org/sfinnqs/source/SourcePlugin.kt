@@ -35,10 +35,11 @@ import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.plugin.java.JavaPlugin
 import org.sfinnqs.source.command.AdminExecutor
 import org.sfinnqs.source.command.SourceExecutor
+import java.net.URL
 
 @NotThreadSafe
 class SourcePlugin : JavaPlugin(), OpenSource {
-    override fun getSource() = "https://github.com/sfinnqs/source"
+    override fun getSource() = URL("https://github.com/sfinnqs/source")
     private var privateConfig: SourceConfig? = null
     val sourceConfig
         get() = privateConfig ?: reload()
