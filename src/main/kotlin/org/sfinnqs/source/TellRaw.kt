@@ -1,4 +1,5 @@
 /**
+ * The Source plugin - A Bukkit plugin for sharing source code
  * Copyright (C) 2019 Finn Voichick
  *
  * This file is part of the Source plugin.
