@@ -40,7 +40,7 @@ import org.sfinnqs.source.SourcePlugin
 class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        val usage = "Usage: $ITALIC/$label <reload | add | remove>"
+        val usage = "Usage: $ITALIC/$label <reload | set>"
         val subCommand = args.getOrNull(0)
         if (subCommand == null) {
             val error = "${RED}Not enough arguments"
@@ -58,33 +58,19 @@ class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
                 sourcePlugin.reload()
                 sender.sendMessage("Source reloaded")
             }
-            subCommand.equals("add", true) -> {
-                val addUsage = "Usage: $ITALIC/$label $subCommand <plugin> <source-code>"
+            subCommand.equals("set", true) -> {
+                val setUsage = "Usage: $ITALIC/$label $subCommand <plugin> <source-code>"
                 if (args.size < 3) {
                     val error = "${RED}Not enough arguments"
-                    sender.sendMessage(arrayOf(error, addUsage))
+                    sender.sendMessage(arrayOf(error, setUsage))
                     return true
                 } else if (args.size >= 4) {
                     val error = "${RED}Too many arguments"
-                    sender.sendMessage(arrayOf(error, addUsage))
+                    sender.sendMessage(arrayOf(error, setUsage))
                     return true
                 }
                 val pluginName = args[1]
                 val sourceCode = args[2]
-                TODO()
-            }
-            subCommand.equals("remove", true) -> {
-                val removeUsage = "Usage: $ITALIC/$label $subCommand <plugin>"
-                if (args.size < 2) {
-                    val error = "${RED}Not enough arguments"
-                    sender.sendMessage(arrayOf(error, removeUsage))
-                    return true
-                } else if (args.size >= 3) {
-                    val error = "${RED}Too many arguments"
-                    sender.sendMessage(arrayOf(error, removeUsage))
-                    return true
-                }
-                val pluginName = args[1]
                 TODO()
             }
             else -> {
@@ -103,13 +89,11 @@ class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
             1 -> {
                 val result = mutableListOf<String>()
                 if (subCommand.matches("reload")) result.add("reload")
-                if (subCommand.matches("add")) result.add("add")
-                if (subCommand.matches("remove")) result.add("remove")
+                if (subCommand.matches("set")) result.add("set")
                 result
             }
             2 -> when {
-                subCommand.equals("add", true) -> pluginSources.allPlugins.toList()
-                subCommand.equals("remove", true) -> pluginSources.plugins.toList()
+                subCommand.equals("set", true) -> pluginSources.plugins.toList()
                 else -> emptyList()
             }
             else -> emptyList()

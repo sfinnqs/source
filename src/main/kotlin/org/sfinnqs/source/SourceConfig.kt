@@ -33,22 +33,46 @@ package org.sfinnqs.source
 import net.jcip.annotations.Immutable
 import org.bukkit.configuration.Configuration
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.configuration.InvalidConfigurationException
 
 @Immutable
-class SourceConfig(config: Configuration) {
-    val serverType = config.getString("server type", null)
-    val joinMessage = config["join message"]!!
-    val sources = createStringMap(config.getSectionOrSet("sources"))
+data class SourceConfig(val serverType: String, val offer: Offer, val chatOffer: Any, val sources: Map<String, String>) {
+    constructor(config: Configuration) : this(config.serverType, config.offer, config.chatOffer, config.sources)
+
     fun asMap(): Map<String, Any> {
-        val result = mutableMapOf<String, Any>()
-        if (serverType != null) result["server type"] = serverType
-        result["join message"] = joinMessage
+        val result = mutableMapOf("server type" to serverType, "offer" to offer.toString(), "chat offer" to chatOffer)
         val sourcesOrNull = sources.takeIf { it.isNotEmpty() }
         if (sourcesOrNull != null) result["sources"] = sourcesOrNull
         return result
     }
 
     private companion object {
+        val Configuration.serverType
+            get() = getString("server type", null)
+                    ?: throw InvalidConfigurationException("server type must be specified in config")
+        val Configuration.offer: Offer
+            get() {
+                val offerString = getString("offer", null)
+                return if (offerString == null) {
+                    logger.warning("offer should be specified in config; defaulting to chat")
+                    Offer.CHAT
+                } else {
+                    val result = Offer.fromString(offerString)
+                    if (result == null) {
+                        logger.warning {
+                            "offer \"$offerString\" not recognized in config; defaulting to chat"
+                        }
+                        Offer.CHAT
+                    } else {
+                        result
+                    }
+                }
+            }
+        val Configuration.chatOffer
+            get() = this["chat offer"] ?: defaultSection!!["chat offer"]!!
+        val Configuration.sources
+            get() = createStringMap(getSectionOrSet("sources"))
+
         fun createStringMap(config: ConfigurationSection): Map<String, String> {
             val result = mutableMapOf<String, String>()
             for (pluginName in config.getKeys(false)) {
@@ -59,14 +83,15 @@ class SourceConfig(config: Configuration) {
         }
 
         fun ConfigurationSection.getSectionOrSet(path: String): ConfigurationSection {
-            val result = getConfigurationSection(path) ?: return createSection(path)
+            val result = getConfigurationSection(path)
+                    ?: return createSection(path)
             return if (isSet(path) && isConfigurationSection(path)) {
                 result
             } else {
-                val default = result.defaultSection ?: return createSection(path)
+                val default = result.defaultSection
+                        ?: return createSection(path)
                 createSection(path, default.getValues(true))
             }
         }
-
     }
 }

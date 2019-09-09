@@ -30,19 +30,16 @@
  */
 package org.sfinnqs.source
 
-import net.jcip.annotations.Immutable
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerJoinEvent
+import java.util.*
 
-@Immutable
-class SourceListener(private val config: SourceConfig) : Listener {
-    @EventHandler
-    fun onPlayerJoin(event: PlayerJoinEvent) {
-        when (config.offer) {
-            Offer.CHAT -> event.player.tellRaw(config.chatOffer)
-            Offer.BOOK -> TODO()
-            Offer.NONE -> return
-        }
+enum class Offer {
+    CHAT,
+    BOOK,
+    NONE;
+
+    override fun toString() = name.toLowerCase(Locale.ROOT)
+
+    companion object {
+        fun fromString(offerName: String) = values().firstOrNull { it.name.equals(offerName, true) }
     }
 }

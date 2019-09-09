@@ -1,5 +1,6 @@
-server type: Spigot
-join message:
+server type: null
+offer: chat
+chat offer:
   - "You can use the "
   - text: /source
     italic: true

@@ -30,19 +30,7 @@
  */
 package org.sfinnqs.source
 
-import net.jcip.annotations.Immutable
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerJoinEvent
+import java.util.logging.Logger
 
-@Immutable
-class SourceListener(private val config: SourceConfig) : Listener {
-    @EventHandler
-    fun onPlayerJoin(event: PlayerJoinEvent) {
-        when (config.offer) {
-            Offer.CHAT -> event.player.tellRaw(config.chatOffer)
-            Offer.BOOK -> TODO()
-            Offer.NONE -> return
-        }
-    }
-}
+lateinit var logger: Logger
+    internal set

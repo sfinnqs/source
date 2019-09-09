@@ -30,4 +30,13 @@
  */
 package org.sfinnqs.source
 
-data class NameAndSource(val name: String?, val source: String?)
+import java.net.MalformedURLException
+
+sealed class SourceOrFailure
+data class NameAndSource(val name: String, val source: String) : SourceOrFailure()
+data class SourceUnavailable(val plugins: Set<String>) : SourceOrFailure() {
+    constructor(plugin: String) : this(setOf(plugin))
+}
+
+data class BadUrl(val e: MalformedURLException) : SourceOrFailure()
+object UnrecognizedName : SourceOrFailure()

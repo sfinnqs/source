@@ -41,7 +41,7 @@ import org.sfinnqs.source.tellRaw
 @NotThreadSafe
 class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String?>): Boolean {
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         val numArgs = args.size
         val usage = "Usage: /$label [plugin]"
         if (numArgs >= 2) {
@@ -76,18 +76,13 @@ class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
     }
 
     private fun sendSource(sender: CommandSender, pluginName: String, usage: String) {
-        val (name, source) = sourcePlugin.pluginSources.getSource(pluginName)
-        if (name == null) {
+        val nameAndSource = sourcePlugin.pluginSources.getSource(pluginName)
+        if (nameAndSource == null) {
             val error = "${RED}\"$pluginName\" not found"
             sender.sendMessage(arrayOf(error, usage))
             return
         }
-        if (source == null) {
-            val error = "${RED}The source code of $BOLD$name$RESET$RED could not be found."
-            val suggestion = "Please contact the server administrator if you believe that this is in error."
-            sender.sendMessage(arrayOf(error, suggestion))
-            return
-        }
+        val (name, source) = nameAndSource
         val messageObject = listOf(
                 "The source code of ",
                 mapOf("text" to name, "bold" to true),
