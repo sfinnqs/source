@@ -30,23 +30,28 @@
  */
 package org.sfinnqs.source
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 import net.jcip.annotations.Immutable
 import org.bukkit.configuration.Configuration
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.InvalidConfigurationException
+import org.sfinnqs.source.util.UnmodifiableMap
 
 @Immutable
-data class SourceConfig(val serverType: String, val offer: Offer, val chatOffer: Any, val sources: Map<String, String>) {
+data class SourceConfig(val serverType: String, val offer: Offer, val chatOffer: String, val sources: UnmodifiableMap<String, String>) {
     constructor(config: Configuration) : this(config.serverType, config.offer, config.chatOffer, config.sources)
 
     fun asMap(): Map<String, Any> {
-        val result = mutableMapOf("server type" to serverType, "offer" to offer.toString(), "chat offer" to chatOffer)
+        val chatObject = adapter.fromJson(chatOffer)!!
+        val result = mutableMapOf("server type" to serverType, "offer" to offer.toString(), "chat offer" to chatObject)
         val sourcesOrNull = sources.takeIf { it.isNotEmpty() }
         if (sourcesOrNull != null) result["sources"] = sourcesOrNull
         return result
     }
 
     private companion object {
+        val adapter: JsonAdapter<Any> = Moshi.Builder().build().adapter(Any::class.java)
         val Configuration.serverType
             get() = getString("server type", null)
                     ?: throw InvalidConfigurationException("server type must be specified in config")
@@ -68,19 +73,21 @@ data class SourceConfig(val serverType: String, val offer: Offer, val chatOffer:
                     }
                 }
             }
-        val Configuration.chatOffer
-            get() = this["chat offer"] ?: defaultSection!!["chat offer"]!!
-        val Configuration.sources
-            get() = createStringMap(getSectionOrSet("sources"))
-
-        fun createStringMap(config: ConfigurationSection): Map<String, String> {
-            val result = mutableMapOf<String, String>()
-            for (pluginName in config.getKeys(false)) {
-                val source = config.getString(pluginName) ?: continue
-                result[pluginName] = source
+        val Configuration.chatOffer: String
+            get() {
+                val obj = this["chat offer"] ?: defaultSection!!["chat offer"]!!
+                return adapter.toJson(obj)
             }
-            return result
-        }
+        val Configuration.sources: UnmodifiableMap<String, String>
+            get() {
+                val section = getSectionOrSet("sources")
+                val result = mutableMapOf<String, String>()
+                for (pluginName in section.getKeys(false)) {
+                    val source = section.getString(pluginName) ?: continue
+                    result[pluginName] = source
+                }
+                return UnmodifiableMap(result)
+            }
 
         fun ConfigurationSection.getSectionOrSet(path: String): ConfigurationSection {
             val result = getConfigurationSection(path)

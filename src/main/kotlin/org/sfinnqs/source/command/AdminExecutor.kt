@@ -30,6 +30,7 @@
  */
 package org.sfinnqs.source.command
 
+import net.jcip.annotations.NotThreadSafe
 import org.bukkit.ChatColor.ITALIC
 import org.bukkit.ChatColor.RED
 import org.bukkit.command.Command
@@ -37,6 +38,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.sfinnqs.source.SourcePlugin
 
+@NotThreadSafe
 class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {

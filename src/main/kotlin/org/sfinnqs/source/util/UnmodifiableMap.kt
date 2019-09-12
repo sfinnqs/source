@@ -28,21 +28,9 @@
  * section 13) but you may omit source code from the "Minecraft: Java Edition"
  * server from the available Corresponding Source.
  */
-package org.sfinnqs.source
+package org.sfinnqs.source.util
 
-import net.jcip.annotations.Immutable
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerJoinEvent
+import net.jcip.annotations.ThreadSafe
 
-@Immutable
-class SourceListener(private val config: SourceConfig) : Listener {
-    @EventHandler
-    fun onPlayerJoin(event: PlayerJoinEvent) {
-        when (config.offer) {
-            Offer.CHAT -> event.player.tellRaw(config.chatOffer)
-            Offer.BOOK -> TODO()
-            Offer.NONE -> return
-        }
-    }
-}
+@ThreadSafe
+class UnmodifiableMap<K, V>(map: Map<K, V>) : Map<K, V> by LinkedHashMap(map)

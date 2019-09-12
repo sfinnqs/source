@@ -30,90 +30,52 @@
  */
 package org.sfinnqs.source
 
-import net.jcip.annotations.NotThreadSafe
-import org.bukkit.configuration.InvalidConfigurationException
+import net.jcip.annotations.Immutable
 import org.bukkit.plugin.Plugin
-import java.net.MalformedURLException
-import java.net.URL
+import org.sfinnqs.source.util.UnmodifiableMap
+import java.util.*
 
-@NotThreadSafe
-class PluginSources(private val sourcePlugin: SourcePlugin) {
+@Immutable
+data class PluginSources(val map: UnmodifiableMap<String, String>) {
+    constructor(config: SourceConfig, plugins: Array<Plugin>) : this(getSources(config, plugins))
 
-    val sources: Map<String, String>
-        get() {
-            val result = mutableMapOf<String, String>()
-            val config = sourcePlugin.sourceConfig
-            val configSources = config.sources
-            val serverType = config.serverType
-            val list = mutableListOf(getSource(serverType))
-            sourcePlugin.server.pluginManager.plugins.mapTo(list) {
-                getSource(it)
-            }
+    private val capitalization = map.keys.associateBy { it.toLowerCase(Locale.ROOT) }
 
-            for (plugin in sourcePlugin.server.pluginManager.plugins) {
-                val pluginName = plugin.name
-                val pluginSource = configSources[pluginName]
-                        ?: (plugin as? OpenSource)?.source
-                        ?: throw InvalidConfigurationException("The source for $pluginName must be specified in your config")
-
-                result[pluginName] = pluginSource
-            }
-            return result
-        }
-
-    fun getSource(pluginName: String): SourceOrFailure {
-        val config = sourcePlugin.sourceConfig
-        val manager = sourcePlugin.server.pluginManager
-        val exactPlugin = manager.getPlugin(pluginName)
-        return if (exactPlugin == null) {
-            val serverType = config.serverType
-            if (pluginName == serverType) {
-                getSourceExact(serverType)
-            } else {
-                val inexactPlugin = manager.plugins.firstOrNull {
-                    it.name.equals(pluginName, true)
-                }
-                if (inexactPlugin == null)
-                    if (pluginName.equals(serverType, true))
-                        getSourceExact(serverType)
-                    else
-                        UnrecognizedName
-                else
-                    getSource(inexactPlugin)
-            }
-        } else {
-            getSource(exactPlugin)
-        }
+    operator fun get(pluginName: String): NameAndSource? {
+        val result = map[pluginName]
+        if (result != null) return NameAndSource(pluginName, result)
+        val realName = capitalization[pluginName.toLowerCase(Locale.ROOT)]
+                ?: return null
+        return NameAndSource(realName, map[realName]!!)
     }
 
     val plugins: Set<String>
-        get() {
-            val result = mutableSetOf(sourcePlugin.sourceConfig.serverType)
-            val pluginNames = sourcePlugin.server.pluginManager.plugins.map {
-                it.name
+        get() = map.keys
+
+    private companion object {
+        fun getSources(config: SourceConfig, plugins: Array<Plugin>): UnmodifiableMap<String, String> {
+            val serverType = config.serverType
+            val configSources = config.sources
+            val missing = mutableSetOf<String>()
+            val serverSource = configSources[serverType]
+            val result = mutableMapOf<String, String>()
+            if (serverSource == null)
+                missing.add(serverType)
+            else
+                result[serverType] = serverSource
+            for (plugin in plugins) {
+                val pluginName = plugin.name
+                val pluginSource = configSources[pluginName]
+                        ?: (plugin as? OpenSource)?.source
+                if (pluginSource == null)
+                    missing.add(pluginName)
+                else
+                    result[pluginName] = pluginSource
             }
-            result.addAll(pluginNames)
-            return result
-        }
-
-    private fun getSource(plugin: Plugin): SourceOrFailure {
-        val pluginName = plugin.name
-        val result = getSourceExact(pluginName)
-        if (result !is SourceUnavailable) return result
-        val pluginSource = (plugin as? OpenSource)?.source ?: return result
-        return NameAndSource(pluginName, pluginSource)
-    }
-
-    // must be official name
-    private fun getSourceExact(pluginName: String): SourceOrFailure {
-        val result = sourcePlugin.sourceConfig.sources[pluginName]
-                ?: return SourceUnavailable(pluginName)
-        return try {
-            NameAndSource(pluginName, URL(result).toString())
-        } catch (e: MalformedURLException) {
-            BadUrl(e)
+            if (missing.isNotEmpty())
+                throw SourcesUnavailableException(missing)
+            return UnmodifiableMap(result)
         }
     }
-
 
 }

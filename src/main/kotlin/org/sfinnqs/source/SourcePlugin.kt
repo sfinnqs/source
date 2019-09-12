@@ -36,24 +36,20 @@ import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.plugin.java.JavaPlugin
 import org.sfinnqs.source.command.AdminExecutor
 import org.sfinnqs.source.command.SourceExecutor
-import java.lang.AssertionError
-import java.net.URL
-import java.util.concurrent.ThreadLocalRandom
 import java.util.logging.Level
-import kotlin.math.log
 
 @NotThreadSafe
 class SourcePlugin : JavaPlugin(), OpenSource {
-    override fun getSource() = URL("https://github.com/sfinnqs/source")
+    override fun getSource() = "https://github.com/sfinnqs/source"
     lateinit var sourceConfig: SourceConfig
         private set
-    val pluginSources = PluginSources(this)
+    lateinit var pluginSources: PluginSources
+        private set
 
     override fun onEnable() {
         org.sfinnqs.source.logger = logger
-        reload()
         try {
-            pluginSources.sources
+            reload()
         } catch (e: InvalidConfigurationException) {
             logger.log(Level.SEVERE, "Disabling Source because not all sources are available", e)
             isEnabled = false
@@ -75,6 +71,7 @@ class SourcePlugin : JavaPlugin(), OpenSource {
         reloadConfig()
         val newConfig = SourceConfig(config)
         sourceConfig = newConfig
+        pluginSources = PluginSources(newConfig, server.pluginManager.plugins)
         writeConfigToFile(newConfig)
     }
 

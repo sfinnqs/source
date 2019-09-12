@@ -30,8 +30,10 @@
  */
 package org.sfinnqs.source
 
+import net.jcip.annotations.Immutable
 import java.util.*
 
+@Immutable
 enum class Offer {
     CHAT,
     BOOK,

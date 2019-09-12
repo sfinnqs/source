@@ -30,13 +30,17 @@
  */
 package org.sfinnqs.source
 
-import java.net.MalformedURLException
+import net.jcip.annotations.ThreadSafe
+import org.bukkit.configuration.InvalidConfigurationException
 
-sealed class SourceOrFailure
-data class NameAndSource(val name: String, val source: String) : SourceOrFailure()
-data class SourceUnavailable(val plugins: Set<String>) : SourceOrFailure() {
-    constructor(plugin: String) : this(setOf(plugin))
+@ThreadSafe
+class SourcesUnavailableException(plugins: Set<String>) : InvalidConfigurationException(getMessage(plugins)) {
+    private companion object {
+        fun getMessage(plugins: Set<String>) = when (plugins.size) {
+            0 -> throw IllegalArgumentException("plugins cannot be empty")
+            1 -> "Source code for ${plugins.first()} must be specified in your config"
+            2 -> "Source code for ${plugins.first()} and ${plugins.last()} must be specified in your config"
+            else -> "Source code for the following must be specified in your config: ${plugins.joinToString()}"
+        }
+    }
 }
-
-data class BadUrl(val e: MalformedURLException) : SourceOrFailure()
-object UnrecognizedName : SourceOrFailure()

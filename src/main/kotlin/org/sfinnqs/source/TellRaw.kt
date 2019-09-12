@@ -30,12 +30,15 @@
  */
 package org.sfinnqs.source
 
-import com.google.gson.Gson
+import com.squareup.moshi.Moshi
 import org.bukkit.command.CommandSender
 
-fun CommandSender.tellRaw(message: Any) {
-    val messageText = Gson().toJson(message)
+private val adapter = Moshi.Builder().build().adapter(Any::class.java)
+
+fun CommandSender.tellRaw(message: Any) = tellRaw(adapter.toJson(message))
+
+fun CommandSender.tellRaw(message: String) {
     // https://stackoverflow.com/a/34636083
-    server.dispatchCommand(server.consoleSender, "tellraw $name $messageText")
+    server.dispatchCommand(server.consoleSender, "tellraw $name $message")
 }
 

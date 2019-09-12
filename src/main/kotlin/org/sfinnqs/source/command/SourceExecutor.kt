@@ -59,7 +59,7 @@ class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
 
     private fun sendAllSources(sender: CommandSender) {
         val messageObject = mutableListOf<Any>("Click the links below to see the corresponding source code:")
-        sourcePlugin.pluginSources.sources.flatMapTo(messageObject) { (pluginName, source) ->
+        sourcePlugin.pluginSources.map.flatMapTo(messageObject) { (pluginName, source) ->
             listOf(
                     "\n- ",
                     mapOf(
@@ -76,7 +76,7 @@ class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
     }
 
     private fun sendSource(sender: CommandSender, pluginName: String, usage: String) {
-        val nameAndSource = sourcePlugin.pluginSources.getSource(pluginName)
+        val nameAndSource = sourcePlugin.pluginSources[pluginName]
         if (nameAndSource == null) {
             val error = "${RED}\"$pluginName\" not found"
             sender.sendMessage(arrayOf(error, usage))

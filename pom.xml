@@ -101,5 +101,10 @@
             <artifactId>source-api</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.squareup.moshi</groupId>
+            <artifactId>moshi</artifactId>
+            <version>1.8.0</version>
+        </dependency>
     </dependencies>
 </project>
