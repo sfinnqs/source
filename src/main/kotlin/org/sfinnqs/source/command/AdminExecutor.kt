@@ -109,7 +109,10 @@ class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
                 result
             }
             2 -> when {
-                subCommand.equals("set", true) -> pluginSources.plugins.toList()
+                subCommand.equals("set", true) -> {
+                    val pluginName = args[1]
+                    pluginSources.plugins.filter { pluginName.matches(it) }
+                }
                 else -> emptyList()
             }
             else -> emptyList()

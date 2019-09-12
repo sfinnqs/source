@@ -31,13 +31,13 @@
 package org.sfinnqs.source
 
 import com.squareup.moshi.Moshi
-import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 
 private val adapter = Moshi.Builder().build().adapter(Any::class.java)
 
-fun CommandSender.tellRaw(message: Any) = tellRaw(adapter.toJson(message))
+fun Player.tellRaw(message: Any) = tellRaw(adapter.toJson(message))
 
-fun CommandSender.tellRaw(message: String) {
+fun Player.tellRaw(message: String) {
     // https://stackoverflow.com/a/34636083
     server.dispatchCommand(server.consoleSender, "tellraw $name $message")
 }

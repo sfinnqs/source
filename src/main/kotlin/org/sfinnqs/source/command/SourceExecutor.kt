@@ -35,6 +35,7 @@ import org.bukkit.ChatColor.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
+import org.bukkit.entity.Player
 import org.sfinnqs.source.SourcePlugin
 import org.sfinnqs.source.tellRaw
 
@@ -58,21 +59,29 @@ class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
     }
 
     private fun sendAllSources(sender: CommandSender) {
-        val messageObject = mutableListOf<Any>("Click the links below to see the corresponding source code:")
-        sourcePlugin.pluginSources.map.flatMapTo(messageObject) { (pluginName, source) ->
-            listOf(
-                    "\n- ",
-                    mapOf(
-                            "text" to pluginName,
-                            "bold" to true,
-                            "underlined" to true,
-                            "color" to "blue",
-                            "clickEvent" to mapOf("action" to "open_url", "value" to source),
-                            "hoverEvent" to mapOf("action" to "show_text", "value" to "$pluginName source code")
-                    )
-            )
+        if (sender is Player) {
+            val messageObject = mutableListOf<Any>("Click the links below to see the corresponding source code:")
+            sourcePlugin.pluginSources.map.flatMapTo(messageObject) { (pluginName, source) ->
+                listOf(
+                        "\n- ",
+                        mapOf(
+                                "text" to pluginName,
+                                "bold" to true,
+                                "underlined" to true,
+                                "color" to "blue",
+                                "clickEvent" to mapOf("action" to "open_url", "value" to source),
+                                "hoverEvent" to mapOf("action" to "show_text", "value" to "$pluginName source code")
+                        )
+                )
+            }
+            sender.tellRaw(messageObject)
+        } else {
+            val messages = mutableListOf("The source code is available at the links below:")
+            sourcePlugin.pluginSources.map.mapTo(messages) { (pluginName, source) ->
+                "- $BOLD$pluginName$RESET: $UNDERLINE$source"
+            }
+            sender.sendMessage(messages.toTypedArray())
         }
-        sender.tellRaw(messageObject)
     }
 
     private fun sendSource(sender: CommandSender, pluginName: String, usage: String) {
@@ -83,19 +92,24 @@ class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
             return
         }
         val (name, source) = nameAndSource
-        val messageObject = listOf(
-                "The source code of ",
-                mapOf("text" to name, "bold" to true),
-                " is available at ",
-                mapOf(
-                        "text" to source,
-                        "underlined" to true,
-                        "color" to "blue",
-                        "clickEvent" to mapOf("action" to "open_url", "value" to source),
-                        "hoverEvent" to mapOf("action" to "show_text", "value" to "$name source code")
-                )
-        )
-        sender.tellRaw(messageObject)
+        if (sender is Player) {
+            val messageObject = listOf(
+                    "The source code of ",
+                    mapOf("text" to name, "bold" to true),
+                    " is available at ",
+                    mapOf(
+                            "text" to source,
+                            "underlined" to true,
+                            "color" to "blue",
+                            "clickEvent" to mapOf("action" to "open_url", "value" to source),
+                            "hoverEvent" to mapOf("action" to "show_text", "value" to "$name source code")
+                    )
+            )
+            sender.tellRaw(messageObject)
+        } else {
+            val message = "The source code of $BOLD$name$RESET is available at $UNDERLINE$source"
+            sender.sendMessage(message)
+        }
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String> {
