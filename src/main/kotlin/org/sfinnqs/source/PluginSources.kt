@@ -33,6 +33,8 @@ package org.sfinnqs.source
 import net.jcip.annotations.Immutable
 import org.bukkit.plugin.Plugin
 import org.sfinnqs.source.util.UnmodifiableMap
+import java.net.MalformedURLException
+import java.net.URL
 import java.util.*
 
 @Immutable
@@ -57,23 +59,32 @@ data class PluginSources(val map: UnmodifiableMap<String, String>) {
             val serverType = config.serverType
             val configSources = config.sources
             val missing = mutableSetOf<String>()
-            val serverSource = configSources[serverType]
+            val badUrls = mutableMapOf<String, MalformedURLException>()
             val result = mutableMapOf<String, String>()
-            if (serverSource == null)
-                missing.add(serverType)
-            else
-                result[serverType] = serverSource
+
+            fun addSource(pluginName: String, source: String?) {
+                if (source == null)
+                    missing.add(pluginName)
+                else
+                    try {
+                        result[serverType] = URL(source).toExternalForm()
+                    } catch (e: MalformedURLException) {
+                        badUrls[serverType] = e
+                    }
+
+            }
+
+            addSource(serverType, configSources[serverType])
             for (plugin in plugins) {
                 val pluginName = plugin.name
                 val pluginSource = configSources[pluginName]
                         ?: (plugin as? OpenSource)?.source
-                if (pluginSource == null)
-                    missing.add(pluginName)
-                else
-                    result[pluginName] = pluginSource
+                addSource(pluginName, pluginSource)
             }
             if (missing.isNotEmpty())
                 throw SourcesUnavailableException(missing)
+            if (badUrls.isNotEmpty())
+                throw BadUrlException(badUrls)
             return UnmodifiableMap(result)
         }
     }

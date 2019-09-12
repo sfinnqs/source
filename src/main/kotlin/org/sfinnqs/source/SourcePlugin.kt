@@ -50,6 +50,12 @@ class SourcePlugin : JavaPlugin(), OpenSource {
         org.sfinnqs.source.logger = logger
         try {
             reload()
+        } catch (e: BadUrlException) {
+            for ((plugin, cause) in e.causes)
+                logger.log(Level.SEVERE, "Please ensure that the URL for $plugin is formatted correctly", cause)
+            logger.severe("Disabling Source because not all sources are available")
+            isEnabled = false
+            return
         } catch (e: InvalidConfigurationException) {
             logger.log(Level.SEVERE, "Disabling Source because not all sources are available", e)
             isEnabled = false
