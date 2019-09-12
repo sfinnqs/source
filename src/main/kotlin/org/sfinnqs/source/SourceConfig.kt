@@ -50,6 +50,11 @@ data class SourceConfig(val serverType: String, val offer: Offer, val chatOffer:
         return result
     }
 
+    fun setSource(plugin: String, source: String): SourceConfig {
+        val newSources = sources.put(plugin, source)
+        return SourceConfig(serverType, offer, chatOffer, newSources)
+    }
+
     private companion object {
         val adapter: JsonAdapter<Any> = Moshi.Builder().build().adapter(Any::class.java)
         val Configuration.serverType

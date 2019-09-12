@@ -36,13 +36,13 @@ import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.plugin.java.JavaPlugin
 import org.sfinnqs.source.command.AdminExecutor
 import org.sfinnqs.source.command.SourceExecutor
+import java.net.URL
 import java.util.logging.Level
 
 @NotThreadSafe
 class SourcePlugin : JavaPlugin(), OpenSource {
     override fun getSource() = "https://github.com/sfinnqs/source"
-    lateinit var sourceConfig: SourceConfig
-        private set
+    private lateinit var sourceConfig: SourceConfig
     lateinit var pluginSources: PluginSources
         private set
 
@@ -75,13 +75,23 @@ class SourcePlugin : JavaPlugin(), OpenSource {
     fun reload() {
         saveDefaultConfig()
         reloadConfig()
-        val newConfig = SourceConfig(config)
-        sourceConfig = newConfig
-        pluginSources = PluginSources(newConfig, server.pluginManager.plugins)
-        writeConfigToFile(newConfig)
+        sourceConfig = SourceConfig(config)
+        logger.info { sourceConfig.toString() } // TODO remove
+        pluginSources = PluginSources(sourceConfig, server.pluginManager.plugins)
+        logger.info { pluginSources.toString() } // TODO remove
+        writeConfigToFile()
     }
 
-    private fun writeConfigToFile(sourceConfig: SourceConfig) {
+    fun setSource(plugin: String, source: String) {
+        val url = URL(source).toExternalForm()
+        val newConfig = sourceConfig.setSource(plugin, url)
+        val newSources = PluginSources(newConfig, server.pluginManager.plugins)
+        sourceConfig = newConfig
+        pluginSources = newSources
+        writeConfigToFile()
+    }
+
+    private fun writeConfigToFile() {
         config.setAll(sourceConfig.asMap())
         saveConfig()
     }

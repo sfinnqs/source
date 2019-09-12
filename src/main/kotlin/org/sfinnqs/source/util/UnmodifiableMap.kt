@@ -33,4 +33,13 @@ package org.sfinnqs.source.util
 import net.jcip.annotations.ThreadSafe
 
 @ThreadSafe
-class UnmodifiableMap<K, V>(map: Map<K, V>) : Map<K, V> by LinkedHashMap(map)
+class UnmodifiableMap<K, V>(map: Map<K, V>) : Map<K, V> by LinkedHashMap(map) {
+    override fun toString() = toMutableMap().toString()
+    override fun equals(other: Any?) = toMutableMap() == other
+    override fun hashCode() = toMutableMap().hashCode()
+    fun put(key: K, value: V): UnmodifiableMap<K, V> {
+        val result = LinkedHashMap(this)
+        result[key] = value
+        return UnmodifiableMap(result)
+    }
+}

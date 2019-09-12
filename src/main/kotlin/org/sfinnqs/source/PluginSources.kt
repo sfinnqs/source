@@ -62,12 +62,12 @@ data class PluginSources(val map: UnmodifiableMap<String, String>) {
             val badUrls = mutableMapOf<String, MalformedURLException>()
             val result = mutableMapOf<String, String>()
 
-            fun addSource(pluginName: String, source: String?) {
+            fun addSource(plugin: String, source: String?) {
                 if (source == null)
-                    missing.add(pluginName)
+                    missing.add(plugin)
                 else
                     try {
-                        result[serverType] = URL(source).toExternalForm()
+                        result[plugin] = URL(source).toExternalForm()
                     } catch (e: MalformedURLException) {
                         badUrls[serverType] = e
                     }

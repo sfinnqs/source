@@ -8,7 +8,10 @@ commands:
     usage: /<command> [plugin]
   sourceadmin:
     description: Administrate the Source plugin
+    permission: source.admin
+    permission-message: §You do not have permission to administrate the Source plugin
     usage: /<command> <reload | add | remove>
 permissions:
-  source.reload:
-    description: Allows use of the "/source reload" command
+  source.admin:
+    description: Allows use of the "/sourceadmin" command
+    default: op

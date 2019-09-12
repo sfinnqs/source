@@ -37,6 +37,8 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.sfinnqs.source.SourcePlugin
+import org.sfinnqs.source.logger
+import java.net.MalformedURLException
 
 @NotThreadSafe
 class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
@@ -71,9 +73,21 @@ class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
                     sender.sendMessage(arrayOf(error, setUsage))
                     return true
                 }
-                val pluginName = args[1]
-                val sourceCode = args[2]
-                TODO()
+                val plugin = args[1]
+                val source = args[2]
+                val senderName = sender.name
+                logger.info {
+                    "Writing config to file because $senderName updated it"
+                }
+                try {
+                    sourcePlugin.setSource(plugin, source)
+                } catch (e: MalformedURLException) {
+                    val error = "$RED\"$source\" was unrecognized as a URL"
+                    val error2 = RED.toString() + e.message
+                    sender.sendMessage(arrayOf(error, error2, setUsage))
+                    return true
+                }
+                sender.sendMessage("Source config updated")
             }
             else -> {
                 val error = "${RED}Unrecognized argument: \"$subCommand\""
