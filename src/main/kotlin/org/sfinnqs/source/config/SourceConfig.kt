@@ -28,23 +28,21 @@
  * section 13) but you may omit source code from the "Minecraft: Java Edition"
  * server from the available Corresponding Source.
  */
-package org.sfinnqs.source
+package org.sfinnqs.source.config
 
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
 import net.jcip.annotations.Immutable
 import org.bukkit.configuration.Configuration
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.InvalidConfigurationException
+import org.sfinnqs.source.logger
 import org.sfinnqs.source.util.UnmodifiableMap
 
 @Immutable
-data class SourceConfig(val serverType: String, val offer: Offer, val chatOffer: String, val sources: UnmodifiableMap<String, String>) {
-    constructor(config: Configuration) : this(config.serverType, config.offer, config.chatOffer, config.sources)
+data class SourceConfig(val serverType: String, val offer: OfferConfig, val sources: UnmodifiableMap<String, String>) {
+    constructor(config: Configuration) : this(config.serverType, config.offer, config.sources)
 
     fun asMap(): Map<String, Any> {
-        val chatObject = adapter.fromJson(chatOffer)!!
-        val result = mutableMapOf("server type" to serverType, "offer" to offer.toString(), "chat offer" to chatObject)
+        val result = mutableMapOf("server type" to serverType, "offer" to offer.asMap())
         val sourcesOrNull = sources.takeIf { it.isNotEmpty() }
         if (sourcesOrNull != null) result["sources"] = sourcesOrNull
         return result
@@ -52,37 +50,15 @@ data class SourceConfig(val serverType: String, val offer: Offer, val chatOffer:
 
     fun setSource(plugin: String, source: String): SourceConfig {
         val newSources = sources.put(plugin, source)
-        return SourceConfig(serverType, offer, chatOffer, newSources)
+        return SourceConfig(serverType, offer, newSources)
     }
 
     private companion object {
-        val adapter: JsonAdapter<Any> = Moshi.Builder().build().adapter(Any::class.java)
         val Configuration.serverType
             get() = getString("server type", null)
                     ?: throw InvalidConfigurationException("server type must be specified in config")
-        val Configuration.offer: Offer
-            get() {
-                val offerString = getString("offer", null)
-                return if (offerString == null) {
-                    logger.warning("offer should be specified in config; defaulting to chat")
-                    Offer.CHAT
-                } else {
-                    val result = Offer.fromString(offerString)
-                    if (result == null) {
-                        logger.warning {
-                            "offer \"$offerString\" not recognized in config; defaulting to chat"
-                        }
-                        Offer.CHAT
-                    } else {
-                        result
-                    }
-                }
-            }
-        val Configuration.chatOffer: String
-            get() {
-                val obj = this["chat offer"] ?: defaultSection!!["chat offer"]!!
-                return adapter.toJson(obj)
-            }
+        val Configuration.offer: OfferConfig
+            get() = OfferConfig(getSectionOrSet("offer"))
         val Configuration.sources: UnmodifiableMap<String, String>
             get() {
                 val section = getSectionOrSet("sources")
@@ -94,16 +70,5 @@ data class SourceConfig(val serverType: String, val offer: Offer, val chatOffer:
                 return UnmodifiableMap(result)
             }
 
-        fun ConfigurationSection.getSectionOrSet(path: String): ConfigurationSection {
-            val result = getConfigurationSection(path)
-                    ?: return createSection(path)
-            return if (isSet(path) && isConfigurationSection(path)) {
-                result
-            } else {
-                val default = result.defaultSection
-                        ?: return createSection(path)
-                createSection(path, default.getValues(true))
-            }
-        }
     }
 }

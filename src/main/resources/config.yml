@@ -1,13 +1,25 @@
 server type: null
-offer: chat
-chat offer:
-  - "You can use the "
-  - text: /source
-    italic: true
-    clickEvent:
-      action: run_command
-      value: /source
-  - " command to see the source code of this server"
+offer:
+  type: chat
+  chat:
+    - "You can use the "
+    - text: /source
+      italic: true
+      clickEvent:
+        action: run_command
+        value: /source
+    - " command to see the source code of this server"
+  book:
+    title: Source Code
+    author: sfinnqs
+    first page:
+      - "This book contains links to the source code of this server, including all plugins running on it.\n\nYou can also use the "
+      - text: /source
+        italic: true
+        clickEvent:
+          action: run_command
+          value: /source
+      - " command to see the same links."
 sources: # case sensitive
   CraftBukkit: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit
   Spigot: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/spigot

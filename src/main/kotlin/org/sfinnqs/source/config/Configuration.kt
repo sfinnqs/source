@@ -28,31 +28,16 @@
  * section 13) but you may omit source code from the "Minecraft: Java Edition"
  * server from the available Corresponding Source.
  */
-package org.sfinnqs.source
+package org.sfinnqs.source.config
 
-import net.jcip.annotations.NotThreadSafe
-import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.configuration.ConfigurationSection
+import org.sfinnqs.source.logger
 
-@NotThreadSafe
-class SourceListener(private val sourcePlugin: SourcePlugin) : Listener {
-    @EventHandler
-    fun onPlayerJoin(event: PlayerJoinEvent) {
-        val config = sourcePlugin.sourceConfig
-        val player = event.player
-        val offer = config.offer
-        when (offer.type) {
-            Offer.CHAT -> player.tellRaw(offer.chat)
-            Offer.BOOK -> player.giveBook()
-            Offer.NONE -> return
-        }
-    }
-
-    private fun Player.giveBook() {
-        val server = sourcePlugin.server
-        val bookData = sourcePlugin.pluginSources.bookData
-        server.dispatchCommand(server.consoleSender, "give $name written_book$bookData")
-    }
+fun ConfigurationSection.getSectionOrSet(path: String): ConfigurationSection {
+    val result = getConfigurationSection(path)
+    if (result != null) return result
+    logger.warning("$path should be specified in your config")
+    val default = defaultSection?.getConfigurationSection(path)
+    if (default != null) return default
+    return createSection(path)
 }

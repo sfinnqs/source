@@ -36,13 +36,14 @@ import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.plugin.java.JavaPlugin
 import org.sfinnqs.source.command.AdminExecutor
 import org.sfinnqs.source.command.SourceExecutor
+import org.sfinnqs.source.config.SourceConfig
 import java.net.URL
 import java.util.logging.Level
 
 @NotThreadSafe
 class SourcePlugin : JavaPlugin(), OpenSource {
     override fun getSource() = "https://github.com/sfinnqs/source"
-    private lateinit var sourceConfig: SourceConfig
+    lateinit var sourceConfig: SourceConfig
     lateinit var pluginSources: PluginSources
         private set
 
@@ -69,16 +70,14 @@ class SourcePlugin : JavaPlugin(), OpenSource {
         val adminExecutor = AdminExecutor(this)
         adminCommand.setExecutor(adminExecutor)
         adminCommand.tabCompleter = adminExecutor
-        server.pluginManager.registerEvents(SourceListener(sourceConfig), this)
+        server.pluginManager.registerEvents(SourceListener(this), this)
     }
 
     fun reload() {
         saveDefaultConfig()
         reloadConfig()
         sourceConfig = SourceConfig(config)
-        logger.info { sourceConfig.toString() } // TODO remove
         pluginSources = PluginSources(sourceConfig, server.pluginManager.plugins)
-        logger.info { pluginSources.toString() } // TODO remove
         writeConfigToFile()
     }
 

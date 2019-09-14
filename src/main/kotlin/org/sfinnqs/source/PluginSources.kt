@@ -30,16 +30,19 @@
  */
 package org.sfinnqs.source
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 import net.jcip.annotations.Immutable
 import org.bukkit.plugin.Plugin
+import org.sfinnqs.source.config.SourceConfig
 import org.sfinnqs.source.util.UnmodifiableMap
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 
 @Immutable
-data class PluginSources(val map: UnmodifiableMap<String, String>) {
-    constructor(config: SourceConfig, plugins: Array<Plugin>) : this(getSources(config, plugins))
+data class PluginSources(val map: UnmodifiableMap<String, String>, val bookData: String) {
+    constructor(config: SourceConfig, plugins: Array<Plugin>) : this(getSources(config, plugins), getBookData(config, getSources(config, plugins)))
 
     private val capitalization = map.keys.associateBy { it.toLowerCase(Locale.ROOT) }
 
@@ -55,6 +58,7 @@ data class PluginSources(val map: UnmodifiableMap<String, String>) {
         get() = map.keys
 
     private companion object {
+        val adapter: JsonAdapter<Any> = Moshi.Builder().build().adapter(Any::class.java)
         fun getSources(config: SourceConfig, plugins: Array<Plugin>): UnmodifiableMap<String, String> {
             val serverType = config.serverType
             val configSources = config.sources
@@ -86,6 +90,39 @@ data class PluginSources(val map: UnmodifiableMap<String, String>) {
             if (badUrls.isNotEmpty())
                 throw BadUrlException(badUrls)
             return UnmodifiableMap(result)
+        }
+
+        fun getBookData(config: SourceConfig, sources: UnmodifiableMap<String, String>): String {
+            val bookConfig = config.offer.book
+            val firstPage = bookConfig.firstPage
+            val pages = mutableListOf(firstPage)
+            val sourcePage = mutableListOf<Any>()
+            sources.flatMapTo(sourcePage) { (plugin, source) ->
+                listOf(
+                        "\n- ",
+                        mapOf(
+                                "text" to plugin,
+                                "bold" to true,
+                                "underlined" to true,
+                                "color" to "blue",
+                                "clickEvent" to mapOf(
+                                        "action" to "open_url",
+                                        "value" to source
+                                ),
+                                "hoverEvent" to mapOf(
+                                        "action" to "show_text",
+                                        "value" to "$plugin source code"
+                                )
+                        )
+                )
+            }
+            pages.add(adapter.toJson(sourcePage))
+            val obj = mapOf(
+                    "title" to bookConfig.title,
+                    "author" to bookConfig.author,
+                    "pages" to pages
+            )
+            return adapter.toJson(obj)
         }
     }
 
