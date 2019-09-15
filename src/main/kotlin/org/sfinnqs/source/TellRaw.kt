@@ -39,6 +39,6 @@ fun Player.tellRaw(message: Any) = tellRaw(adapter.toJson(message))
 
 fun Player.tellRaw(message: String) {
     // https://stackoverflow.com/a/34636083
-    server.dispatchCommand(server.consoleSender, "tellraw $name $message")
+    server.dispatchCommand(server.consoleSender, "minecraft:tellraw $name $message")
 }
 

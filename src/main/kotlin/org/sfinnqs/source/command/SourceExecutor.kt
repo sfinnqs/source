@@ -67,7 +67,6 @@ class SourceExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
                         mapOf(
                                 "text" to pluginName,
                                 "bold" to true,
-                                "underlined" to true,
                                 "color" to "blue",
                                 "clickEvent" to mapOf("action" to "open_url", "value" to source),
                                 "hoverEvent" to mapOf("action" to "show_text", "value" to "$pluginName source code")

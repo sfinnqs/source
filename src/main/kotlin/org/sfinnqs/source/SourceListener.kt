@@ -53,6 +53,6 @@ class SourceListener(private val sourcePlugin: SourcePlugin) : Listener {
     private fun Player.giveBook() {
         val server = sourcePlugin.server
         val bookData = sourcePlugin.pluginSources.bookData
-        server.dispatchCommand(server.consoleSender, "give $name written_book$bookData")
+        server.dispatchCommand(server.consoleSender, "minecraft:give $name written_book$bookData")
     }
 }

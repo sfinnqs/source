@@ -5,9 +5,13 @@ offer:
     - "You can use the "
     - text: /source
       italic: true
+      color: light_purple
       clickEvent:
         action: run_command
         value: /source
+      hoverEvent:
+        action: show_text
+        value: Click to run the /source command
     - " command to see the source code of this server"
   book:
     title: Source Code
@@ -16,9 +20,13 @@ offer:
       - "This book contains links to the source code of this server, including all plugins running on it.\n\nYou can also use the "
       - text: /source
         italic: true
+        color: dark_purple
         clickEvent:
           action: run_command
           value: /source
+        hoverEvent:
+          action: show_text
+          value: Click to run the /source command
       - " command to see the same links."
 sources: # case sensitive
   CraftBukkit: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit
