@@ -30,15 +30,14 @@
  */
 package org.sfinnqs.source.config
 
+import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.toPersistentMap
 import net.jcip.annotations.Immutable
 import org.bukkit.configuration.Configuration
-import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.InvalidConfigurationException
-import org.sfinnqs.source.logger
-import org.sfinnqs.source.util.UnmodifiableMap
 
 @Immutable
-data class SourceConfig(val serverType: String, val offer: OfferConfig, val sources: UnmodifiableMap<String, String>) {
+data class SourceConfig(val serverType: String, val offer: OfferConfig, val sources: PersistentMap<String, String>) {
     constructor(config: Configuration) : this(config.serverType, config.offer, config.sources)
 
     fun asMap(): Map<String, Any> {
@@ -48,10 +47,7 @@ data class SourceConfig(val serverType: String, val offer: OfferConfig, val sour
         return result
     }
 
-    fun setSource(plugin: String, source: String): SourceConfig {
-        val newSources = sources.put(plugin, source)
-        return SourceConfig(serverType, offer, newSources)
-    }
+    fun setSource(plugin: String, source: String) = copy(sources = sources.put(plugin, source))
 
     private companion object {
         val Configuration.serverType
@@ -59,7 +55,7 @@ data class SourceConfig(val serverType: String, val offer: OfferConfig, val sour
                     ?: throw InvalidConfigurationException("server type must be specified in config")
         val Configuration.offer: OfferConfig
             get() = OfferConfig(getSectionOrSet("offer"))
-        val Configuration.sources: UnmodifiableMap<String, String>
+        val Configuration.sources: PersistentMap<String, String>
             get() {
                 val section = getSectionOrSet("sources")
                 val result = mutableMapOf<String, String>()
@@ -67,7 +63,7 @@ data class SourceConfig(val serverType: String, val offer: OfferConfig, val sour
                     val source = section.getString(pluginName) ?: continue
                     result[pluginName] = source
                 }
-                return UnmodifiableMap(result)
+                return result.toPersistentMap()
             }
 
     }
