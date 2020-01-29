@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -43,7 +43,12 @@ import java.net.MalformedURLException
 @NotThreadSafe
 class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
+    override fun onCommand(
+        sender: CommandSender,
+        command: Command,
+        label: String,
+        args: Array<String>
+    ): Boolean {
         val usage = "Usage: $ITALIC/$label <reload | set>"
         val subCommand = args.getOrNull(0)
         if (subCommand == null) {
@@ -63,7 +68,8 @@ class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
                 sender.sendMessage("Source reloaded")
             }
             subCommand.equals("set", true) -> {
-                val setUsage = "Usage: $ITALIC/$label $subCommand <plugin> <source-code>"
+                val setUsage =
+                    "Usage: $ITALIC/$label $subCommand <plugin> <source-code>"
                 if (args.size < 3) {
                     val error = "${RED}Not enough arguments"
                     sender.sendMessage(arrayOf(error, setUsage))
@@ -98,7 +104,12 @@ class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
         return true
     }
 
-    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String> {
+    override fun onTabComplete(
+        sender: CommandSender,
+        command: Command,
+        alias: String,
+        args: Array<String>
+    ): List<String> {
         val subCommand = args[0]
         val pluginSources = sourcePlugin.pluginSources
         return when (args.size) {
@@ -120,7 +131,8 @@ class AdminExecutor(private val sourcePlugin: SourcePlugin) : TabExecutor {
     }
 
     private companion object {
-        fun String.matches(completion: String) = completion.startsWith(this, true) && !completion.equals(this, true)
+        fun String.matches(completion: String) =
+            completion.startsWith(this, true) && !completion.equals(this, true)
     }
 
 }

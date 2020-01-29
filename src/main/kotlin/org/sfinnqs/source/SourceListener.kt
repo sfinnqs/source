@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -53,6 +53,9 @@ class SourceListener(private val sourcePlugin: SourcePlugin) : Listener {
     private fun Player.giveBook() {
         val server = sourcePlugin.server
         val bookData = sourcePlugin.pluginSources.bookData
-        server.dispatchCommand(server.consoleSender, "minecraft:give $name written_book$bookData")
+        server.dispatchCommand(
+            server.consoleSender,
+            "minecraft:give $name written_book$bookData"
+        )
     }
 }

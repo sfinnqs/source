@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -42,6 +42,8 @@ enum class Offer {
     override fun toString() = name.toLowerCase(Locale.ROOT)
 
     companion object {
-        fun fromString(offerName: String) = values().firstOrNull { it.name.equals(offerName, true) }
+        fun fromString(offerName: String) = values().firstOrNull {
+            it.name.equals(offerName, true)
+        }
     }
 }

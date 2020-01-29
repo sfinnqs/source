@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -39,6 +39,9 @@ fun Player.tellRaw(message: Any) = tellRaw(adapter.toJson(message))
 
 fun Player.tellRaw(message: String) {
     // https://stackoverflow.com/a/34636083
-    server.dispatchCommand(server.consoleSender, "minecraft:tellraw $name $message")
+    server.dispatchCommand(
+        server.consoleSender,
+        "minecraft:tellraw $name $message"
+    )
 }
 

@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -34,7 +34,8 @@ import net.jcip.annotations.ThreadSafe
 import org.bukkit.configuration.InvalidConfigurationException
 
 @ThreadSafe
-class SourcesUnavailableException(plugins: Set<String>) : InvalidConfigurationException(getMessage(plugins)) {
+class SourcesUnavailableException(plugins: Set<String>) :
+    InvalidConfigurationException(getMessage(plugins)) {
     private companion object {
         fun getMessage(plugins: Set<String>) = when (plugins.size) {
             0 -> throw IllegalArgumentException("plugins cannot be empty")

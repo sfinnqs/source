@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -31,13 +31,6 @@
 package org.sfinnqs.source.config
 
 import org.bukkit.configuration.ConfigurationSection
-import org.sfinnqs.source.logger
 
-fun ConfigurationSection.getSectionOrSet(path: String): ConfigurationSection {
-    val result = getConfigurationSection(path)
-    if (result != null) return result
-    logger.warning("$path should be specified in your config")
-    val default = defaultSection?.getConfigurationSection(path)
-    if (default != null) return default
-    return createSection(path)
-}
+fun ConfigurationSection.getSectionOrEmpty(path: String) =
+    getConfigurationSection(path) ?: createSection(path)

@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -44,16 +44,24 @@ import java.net.URL
 import java.util.*
 
 @Immutable
-data class PluginSources(val map: ImmutableMap<String, String>, val bookData: String) {
-    constructor(config: SourceConfig, plugins: Array<Plugin>) : this(getSources(config, plugins), getBookData(config, getSources(config, plugins)))
+data class PluginSources(
+    val map: ImmutableMap<String, String>,
+    val bookData: String
+) {
+    constructor(config: SourceConfig, plugins: Array<Plugin>) : this(
+        getSources(config, plugins),
+        getBookData(config, getSources(config, plugins))
+    )
 
-    private val capitalization = map.keys.associateBy { it.toLowerCase(Locale.ROOT) }
+    private val capitalization = map.keys.associateBy { name ->
+        name.toLowerCase(Locale.ROOT)
+    }
 
     operator fun get(pluginName: String): NameAndSource? {
         val result = map[pluginName]
         if (result != null) return NameAndSource(pluginName, result)
         val realName = capitalization[pluginName.toLowerCase(Locale.ROOT)]
-                ?: return null
+            ?: return null
         return NameAndSource(realName, map[realName]!!)
     }
 
@@ -61,11 +69,17 @@ data class PluginSources(val map: ImmutableMap<String, String>, val bookData: St
         get() = map.keys
 
     private companion object {
-        val adapter: JsonAdapter<Any> = Moshi.Builder().build().adapter(Any::class.java)
+        val adapter: JsonAdapter<Any> =
+            Moshi.Builder().build().adapter(Any::class.java)
 
         val fontWidths = run {
-            val type = Types.newParameterizedType(Map::class.java, Character::class.java, Integer::class.java)
-            val fontWidthAdapter = Moshi.Builder().build().adapter<Map<Char, Int>>(type)
+            val type = Types.newParameterizedType(
+                Map::class.java,
+                Character::class.java,
+                Integer::class.java
+            )
+            val fontWidthAdapter =
+                Moshi.Builder().build().adapter<Map<Char, Int>>(type)
             // https://bukkit.org/threads/formatting-plugin-output-text-into-columns.8481/#post-133295
             this::class.java.getResourceAsStream("/font-widths.json").use { stream ->
                 Okio.source(stream).use { source ->
@@ -76,7 +90,10 @@ data class PluginSources(val map: ImmutableMap<String, String>, val bookData: St
             }!!
         }
 
-        fun getSources(config: SourceConfig, plugins: Array<Plugin>): ImmutableMap<String, String> {
+        fun getSources(
+            config: SourceConfig,
+            plugins: Array<Plugin>
+        ): ImmutableMap<String, String> {
             val serverType = config.serverType
             val configSources = config.sources
             val missing = mutableSetOf<String>()
@@ -99,7 +116,7 @@ data class PluginSources(val map: ImmutableMap<String, String>, val bookData: St
             for (plugin in plugins) {
                 val pluginName = plugin.name
                 val pluginSource = configSources[pluginName]
-                        ?: (plugin as? OpenSource)?.source
+                    ?: (plugin as? OpenSource)?.source
                 addSource(pluginName, pluginSource)
             }
             if (missing.isNotEmpty())
@@ -109,15 +126,23 @@ data class PluginSources(val map: ImmutableMap<String, String>, val bookData: St
             return result.toImmutableMap()
         }
 
-        fun getBookData(config: SourceConfig, sources: Map<String, String>): String {
+        fun getBookData(
+            config: SourceConfig,
+            sources: Map<String, String>
+        ): String {
             val bookConfig = config.offer.book
             val firstPage = bookConfig.firstPage
             val pages = mutableListOf(firstPage)
-            pages.addAll(getSourcePages(sources.map { NameAndSource(it.key, it.value) }))
+            pages.addAll(getSourcePages(sources.map {
+                NameAndSource(
+                    it.key,
+                    it.value
+                )
+            }))
             val obj = mapOf(
-                    "title" to bookConfig.title,
-                    "author" to bookConfig.author,
-                    "pages" to pages
+                "title" to bookConfig.title,
+                "author" to bookConfig.author,
+                "pages" to pages
             )
             return adapter.toJson(obj)
         }
@@ -130,7 +155,12 @@ data class PluginSources(val map: ImmutableMap<String, String>, val bookData: St
                 val (text, lines) = getPluginLines(plugin, source)
                 if (lines > linesLeft) {
                     val pageString = adapter.toJson(pageText)
-                    return listOf(pageString) + getSourcePages(plugins.subList(i, plugins.size))
+                    return listOf(pageString) + getSourcePages(
+                        plugins.subList(
+                            i,
+                            plugins.size
+                        )
+                    )
                 } else {
                     if (i != 0) pageText.add('\n')
                     pageText.addAll(text)
@@ -143,11 +173,21 @@ data class PluginSources(val map: ImmutableMap<String, String>, val bookData: St
 
         fun getPluginLines(plugin: String, source: String): PluginText {
             val prefix = "- "
-            val (text, lines) = getPluginText(plugin, source, plugin, TOTAL_WIDTH - prefix.width)
+            val (text, lines) = getPluginText(
+                plugin,
+                source,
+                plugin,
+                TOTAL_WIDTH - prefix.width
+            )
             return PluginText(listOf(prefix) + text, lines)
         }
 
-        fun getPluginText(plugin: String, source: String, substring: String, lineWidth: Int): PluginText {
+        fun getPluginText(
+            plugin: String,
+            source: String,
+            substring: String,
+            lineWidth: Int
+        ): PluginText {
             val builder = StringBuilder()
             var widthLeft = lineWidth
             for ((i, char) in substring.withIndex()) {
@@ -156,10 +196,15 @@ data class PluginSources(val map: ImmutableMap<String, String>, val bookData: St
                     val nextLinePrefix = "   "
                     val nextSubstring = substring.substring(i)
                     val nextLineWidth = TOTAL_WIDTH - nextLinePrefix.width
-                    val (nextText, nextLines) = getPluginText(plugin, source, nextSubstring, nextLineWidth)
+                    val (nextText, nextLines) = getPluginText(
+                        plugin,
+                        source,
+                        nextSubstring,
+                        nextLineWidth
+                    )
                     val toPrepend = listOf(
-                            stringToLink(plugin, source, builder.toString()),
-                            '\n' + nextLinePrefix
+                        stringToLink(plugin, source, builder.toString()),
+                        '\n' + nextLinePrefix
                     )
                     return PluginText(toPrepend + nextText, 1 + nextLines)
                 } else {
@@ -172,22 +217,22 @@ data class PluginSources(val map: ImmutableMap<String, String>, val bookData: St
         }
 
         fun stringToLink(plugin: String, source: String, text: String) = mapOf(
-                "text" to text,
-                "bold" to true,
-                "color" to "blue",
-                "clickEvent" to mapOf(
-                        "action" to "open_url",
-                        "value" to source
-                ),
-                "hoverEvent" to mapOf(
-                        "action" to "show_text",
-                        "value" to "$plugin source code"
-                )
+            "text" to text,
+            "bold" to true,
+            "color" to "blue",
+            "clickEvent" to mapOf(
+                "action" to "open_url",
+                "value" to source
+            ),
+            "hoverEvent" to mapOf(
+                "action" to "show_text",
+                "value" to "$plugin source code"
+            )
         )
 
         val Char.width
             get() = fontWidths[this]
-                    ?: throw IllegalArgumentException(this.toString())
+                ?: throw IllegalArgumentException(this.toString())
 
         val Char.boldWidth
             get() = width + 1

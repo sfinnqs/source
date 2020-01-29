@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -53,12 +53,20 @@ class SourcePlugin : JavaPlugin(), OpenSource {
             reload()
         } catch (e: BadUrlException) {
             for ((plugin, cause) in e.causes)
-                logger.log(Level.SEVERE, "Please ensure that the URL for $plugin is formatted correctly", cause)
+                logger.log(
+                    Level.SEVERE,
+                    "Please ensure that the URL for $plugin is formatted correctly",
+                    cause
+                )
             logger.severe("Disabling Source because not all sources are available")
             isEnabled = false
             return
         } catch (e: InvalidConfigurationException) {
-            logger.log(Level.SEVERE, "Disabling Source because not all sources are available", e)
+            logger.log(
+                Level.SEVERE,
+                "Disabling Source because not all sources are available",
+                e
+            )
             isEnabled = false
             return
         }
@@ -77,7 +85,8 @@ class SourcePlugin : JavaPlugin(), OpenSource {
         saveDefaultConfig()
         reloadConfig()
         sourceConfig = SourceConfig(config)
-        pluginSources = PluginSources(sourceConfig, server.pluginManager.plugins)
+        val plugins = server.pluginManager.plugins
+        pluginSources = PluginSources(sourceConfig, plugins)
         writeConfigToFile()
     }
 

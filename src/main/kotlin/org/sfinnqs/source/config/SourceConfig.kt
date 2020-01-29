@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -31,33 +31,43 @@
 package org.sfinnqs.source.config
 
 import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentMap
 import net.jcip.annotations.Immutable
 import org.bukkit.configuration.Configuration
 import org.bukkit.configuration.InvalidConfigurationException
 
 @Immutable
-data class SourceConfig(val serverType: String, val offer: OfferConfig, val sources: PersistentMap<String, String>) {
-    constructor(config: Configuration) : this(config.serverType, config.offer, config.sources)
+data class SourceConfig(
+    val serverType: String,
+    val offer: OfferConfig,
+    val sources: PersistentMap<String, String>
+) {
+    constructor(config: Configuration) : this(
+        config.serverType,
+        config.offer,
+        config.sources
+    )
 
     fun asMap(): Map<String, Any> {
-        val result = mutableMapOf("server type" to serverType, "offer" to offer.asMap())
-        val sourcesOrNull = sources.takeIf { it.isNotEmpty() }
-        if (sourcesOrNull != null) result["sources"] = sourcesOrNull
-        return result
+        val result =
+            mutableMapOf("server type" to serverType, "offer" to offer.asMap())
+        if (sources.isNotEmpty()) result["sources"] = sources
+        return result.toImmutableMap()
     }
 
-    fun setSource(plugin: String, source: String) = copy(sources = sources.put(plugin, source))
+    fun setSource(plugin: String, source: String) =
+        copy(sources = sources.put(plugin, source))
 
     private companion object {
         val Configuration.serverType
             get() = getString("server type", null)
-                    ?: throw InvalidConfigurationException("server type must be specified in config")
+                ?: throw InvalidConfigurationException("server type must be specified in config")
         val Configuration.offer: OfferConfig
-            get() = OfferConfig(getSectionOrSet("offer"))
+            get() = OfferConfig(getSectionOrEmpty("offer"))
         val Configuration.sources: PersistentMap<String, String>
             get() {
-                val section = getSectionOrSet("sources")
+                val section = getSectionOrEmpty("sources")
                 val result = mutableMapOf<String, String>()
                 for (pluginName in section.getKeys(false)) {
                     val source = section.getString(pluginName) ?: continue

@@ -1,6 +1,6 @@
 /**
  * The Source plugin - A Bukkit plugin for sharing source code
- * Copyright (C) 2019 sfinnqs
+ * Copyright (C) 2020 sfinnqs
  *
  * This file is part of the Source plugin.
  *
@@ -38,17 +38,26 @@ import org.sfinnqs.source.Offer
 import org.sfinnqs.source.logger
 
 @Immutable
-data class OfferConfig(val type: Offer, val chat: String, val book: BookConfig) {
-    constructor(config: ConfigurationSection) : this(config.type, config.chat, config.book)
+data class OfferConfig(
+    val type: Offer,
+    val chat: String,
+    val book: BookConfig
+) {
+    constructor(config: ConfigurationSection) : this(
+        config.type,
+        config.chat,
+        config.book
+    )
 
     fun asMap(): Map<String, Any> = mapOf(
-            "type" to type.toString(),
-            "chat" to adapter.fromJson(chat)!!,
-            "book" to book.asMap()
+        "type" to type.toString(),
+        "chat" to adapter.fromJson(chat)!!,
+        "book" to book.asMap()
     )
 
     private companion object {
-        val adapter: JsonAdapter<Any> = Moshi.Builder().build().adapter(Any::class.java)
+        val adapter: JsonAdapter<Any> =
+            Moshi.Builder().build().adapter(Any::class.java)
         val ConfigurationSection.type: Offer
             get() {
                 val offerString = getString("type", null) ?: run {
@@ -68,6 +77,6 @@ data class OfferConfig(val type: Offer, val chat: String, val book: BookConfig) 
                 return adapter.toJson(obj)
             }
         val ConfigurationSection.book
-            get() = BookConfig(getSectionOrSet("book"))
+            get() = BookConfig(getSectionOrEmpty("book"))
     }
 }
