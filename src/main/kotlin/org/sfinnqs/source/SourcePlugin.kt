@@ -42,7 +42,7 @@ import java.util.logging.Level
 
 @NotThreadSafe
 class SourcePlugin : JavaPlugin(), OpenSource {
-    override fun getSource() = "https://github.com/sfinnqs/source"
+    override fun getSource() = "https://gitlab.com/sfinnqs/source"
     lateinit var sourceConfig: SourceConfig
     lateinit var pluginSources: PluginSources
         private set
